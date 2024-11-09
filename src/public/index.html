@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRUD API Frontend</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+      }
+      section {
+        margin-bottom: 20px;
+        align-items: center;
+      }
+      input {
+        margin: 5px 0;
+        padding: 8px;
+        width: 100%;
+      }
+      button {
+        padding: 8px 15px;
+        margin: 5px 0;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      li {
+        margin: 5px 0;
+        padding: 10px;
+        border: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Gerenciamento de Clientes</h1>
+
+    <!-- Listar Clientes -->
+    <section id="listCustomers">
+      <h2>Listar Clientes</h2>
+      <button onclick="listCustomers()">Listar Clientes</button>
+      <ul id="customersList"></ul>
+    </section>
+
+    <!-- Localizar Cliente -->
+    <section id="locateCustomer">
+      <h2>Localizar Cliente</h2>
+      <input type="number" id="customerId" placeholder="ID do Cliente" />
+      <button onclick="locateCustomer()">Localizar</button>
+      <ul id="singleCustomer"></ul>
+    </section>
+
+    <!-- Criar Cliente -->
+    <section id="createCustomer">
+      <h2>Criar Cliente</h2>
+      <input type="text" id="newCustomerName" placeholder="Nome" />
+      <input type="number" id="newCustomerAge" placeholder="Idade" />
+      <button onclick="createCustomer()">Criar</button>
+    </section>
+
+    <!-- Atualizar Cliente -->
+    <section id="updateCustomer">
+      <h2>Atualizar Cliente</h2>
+      <input type="number" id="updateCustomerId" placeholder="ID do Cliente" />
+      <input type="text" id="updateCustomerName" placeholder="Novo Nome" />
+      <input type="number" id="updateCustomerAge" placeholder="Nova Idade" />
+      <button onclick="updateCustomer()">Atualizar</button>
+    </section>
+
+    <!-- Remover Cliente -->
+    <section id="deleteCustomer">
+      <h2>Remover Cliente</h2>
+      <input type="number" id="deleteCustomerId" placeholder="ID do Cliente" />
+      <button onclick="deleteCustomer()">Remover</button>
+    </section>
+
+    <script>
+      const baseUrl = 'http://localhost:3000/customers';
+
+      // Listar todos os clientes
+      function listCustomers() {
+        fetch(baseUrl)
+          .then((response) => response.json())
+          .then((data) => {
+            const list = document.getElementById('customersList');
+            list.innerHTML = '';
+            data.forEach((customer) => {
+              const li = document.createElement('li');
+              li.textContent = `ID: ${customer.id}, Nome: ${customer.name}, Idade: ${customer.idade}`;
+              list.appendChild(li);
+            });
+          })
+          .catch((err) => console.error('Erro ao listar clientes:', err));
+      }
+
+      // Localizar cliente por ID
+      function locateCustomer() {
+        const id = document.getElementById('customerId').value;
+        fetch(`${baseUrl}/${id}`)
+          .then((response) => response.json())
+          .then((customer) => {
+            const list = document.getElementById('singleCustomer');
+            list.innerHTML = '';
+            const li = document.createElement('li');
+            li.textContent = `ID: ${customer.id}, Nome: ${customer.name}, Idade: ${customer.idade}`;
+            list.appendChild(li);
+          })
+          .catch((err) => console.error('Erro ao localizar cliente:', err));
+      }
+
+      // Criar novo cliente
+      function createCustomer() {
+        const name = document.getElementById('newCustomerName').value;
+        const idade = document.getElementById('newCustomerAge').value;
+        fetch(baseUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, idade }),
+        })
+          .then((response) => response.json())
+          .then((customer) => {
+            alert(`Cliente ${customer.name} criado com sucesso!`);
+            listCustomers(); // Atualiza a lista
+          })
+          .catch((err) => console.error('Erro ao criar cliente:', err));
+      }
+
+      // Atualizar cliente existente
+      function updateCustomer() {
+        const id = document.getElementById('updateCustomerId').value;
+        const name = document.getElementById('updateCustomerName').value;
+        const idade = document.getElementById('updateCustomerAge').value;
+        fetch(`${baseUrl}/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, idade }),
+        })
+          .then((response) => response.json())
+          .then((customer) => {
+            alert(`Cliente ${customer.name} atualizado com sucesso!`);
+            listCustomers(); // Atualiza a lista
+          })
+          .catch((err) => console.error('Erro ao atualizar cliente:', err));
+      }
+
+      // Remover cliente por ID
+      function deleteCustomer() {
+        const id = document.getElementById('deleteCustomerId').value;
+        fetch(`${baseUrl}/${id}`, {
+          method: 'DELETE',
+        })
+          .then((response) => {
+            if (response.ok) {
+              alert(`Cliente de ID ${id} removido com sucesso!`);
+              listCustomers(); // Atualiza a lista
+            } else {
+              throw new Error('Erro ao remover cliente');
+            }
+          })
+          .catch((err) => console.error(err));
+      }
+    </script>
+  </body>
+</html>
